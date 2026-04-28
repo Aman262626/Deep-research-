@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mystery — Phone Lookup</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0d0d0d;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container { max-width: 700px; width: 100%; padding: 30px 20px; }
+
+    h1 {
+      text-align: center;
+      font-size: 2.4rem;
+      background: linear-gradient(135deg, #a855f7, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #888;
+      font-size: .9rem;
+      margin-bottom: 30px;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .search-box input {
+      flex: 1;
+      padding: 14px 18px;
+      border: 1px solid #333;
+      border-radius: 10px;
+      background: #1a1a1a;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .search-box input:focus { border-color: #a855f7; }
+    .search-box input::placeholder { color: #555; }
+    .search-box button {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #a855f7, #ec4899);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    .search-box button:hover { opacity: .85; }
+    .search-box button:disabled { opacity: .5; cursor: not-allowed; }
+
+    #error {
+      background: #2d1215;
+      color: #f87171;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .card {
+      background: #151515;
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .card h2 {
+      font-size: 1.1rem;
+      color: #a855f7;
+      margin-bottom: 14px;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #1e1e1e;
+      font-size: .92rem;
+    }
+    .row:last-child { border-bottom: none; }
+    .row .label { color: #888; }
+    .row .value { color: #ddd; text-align: right; max-width: 55%; word-break: break-word; }
+
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+    }
+    .link-btn {
+      display: block;
+      text-align: center;
+      padding: 10px 8px;
+      border-radius: 8px;
+      background: #1e1e1e;
+      color: #c084fc;
+      text-decoration: none;
+      font-size: .88rem;
+      font-weight: 500;
+      transition: background .2s;
+    }
+    .link-btn:hover { background: #2a2a2a; }
+
+    .limit-info {
+      text-align: center;
+      color: #666;
+      font-size: .82rem;
+      margin-top: 8px;
+    }
+
+    .spinner {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      color: #a855f7;
+    }
+
+    footer {
+      margin-top: auto;
+      padding: 20px;
+      text-align: center;
+      color: #444;
+      font-size: .78rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Mystery</h1>
+    <p class="subtitle">Phone Number Lookup Tool</p>
+
+    <div class="search-box">
+      <input id="phone" type="text" placeholder="+79999993993" />
+      <button id="btn" onclick="doLookup()">Поиск</button>
+    </div>
+
+    <div id="error"></div>
+    <div id="spinner" class="spinner">Поиск данных...</div>
+
+    <div id="result-card" class="card">
+      <h2>Результаты</h2>
+      <div id="result-rows"></div>
+      <p id="limit-text" class="limit-info"></p>
+    </div>
+
+    <div id="links-card" class="card">
+      <h2>Проверить ссылки</h2>
+      <div id="links-grid" class="links-grid"></div>
+    </div>
+  </div>
+
+  <footer>Mystery Phone Lookup &copy; 2025</footer>
+
+  <script>
+    const LABELS = {
+      country: "Страна",
+      city: "Город",
+      postal_code: "Почтовый индекс",
+      currency_code: "Код валюты",
+      phone_codes: "Телефонные коды",
+      auto_code: "Код региона авто",
+      operator: "Оператор",
+      location: "Местоположение",
+      geo_location: "Локация",
+      language: "Язык общения",
+      region: "Край / Округ / Область",
+      capital: "Столица",
+      lat_lon: "Широта / Долгота",
+    };
+
+    async function doLookup() {
+      const phone = document.getElementById("phone").value.trim();
+      if (!phone) return;
+
+      const btn = document.getElementById("btn");
+      const errEl = document.getElementById("error");
+      const spinner = document.getElementById("spinner");
+      const resultCard = document.getElementById("result-card");
+      const linksCard = document.getElementById("links-card");
+
+      btn.disabled = true;
+      errEl.style.display = "none";
+      resultCard.style.display = "none";
+      linksCard.style.display = "none";
+      spinner.style.display = "block";
+
+      try {
+        const res = await fetch("/api/lookup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone }),
+        });
+        const json = await res.json();
+
+        if (json.error) {
+          errEl.textContent = json.error;
+          errEl.style.display = "block";
+          return;
+        }
+
+        // Render result rows
+        const rows = document.getElementById("result-rows");
+        rows.innerHTML = "";
+        for (const [key, label] of Object.entries(LABELS)) {
+          const val = json.data[key] || "—";
+          rows.innerHTML += `<div class="row"><span class="label">${label}</span><span class="value">${val}</span></div>`;
+        }
+        document.getElementById("limit-text").textContent =
+          "Оставшиеся лимиты: " + (json.data.limit ?? "—");
+        resultCard.style.display = "block";
+
+        // Render links
+        const grid = document.getElementById("links-grid");
+        grid.innerHTML = "";
+        for (const l of json.links) {
+          grid.innerHTML += `<a class="link-btn" href="${l.url}" target="_blank" rel="noopener">${l.name}</a>`;
+        }
+        linksCard.style.display = "block";
+      } catch {
+        errEl.textContent = "Ошибка сети";
+        errEl.style.display = "block";
+      } finally {
+        spinner.style.display = "none";
+        btn.disabled = false;
+      }
+    }
+
+    document.getElementById("phone").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") doLookup();
+    });
+  </script>
+</body>
+</html>
