@@ -4,7 +4,7 @@ import requests
 app = Flask(__name__)
 
 API_URL = "https://htmlweb.ru/geo/api.php?json&telcod="
-NOT_FOUND = "Информация отсутствует"
+NOT_FOUND = "जानकारी उपलब्ध नहीं"
 USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
     "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Safari/605.1.15"
@@ -19,15 +19,15 @@ def lookup_number(phone: str) -> dict:
             timeout=10,
         )
         if not resp.ok:
-            return {"error": "Данные не найдены"}
+            return {"error": "डेटा नहीं मिला"}
         data = resp.json()
     except requests.exceptions.RequestException:
-        return {"error": "Ошибка соединения с сервером"}
+        return {"error": "सर्वर से कनेक्शन में त्रुटि"}
 
     if data.get("limit", 1) <= 0:
-        return {"error": "Лимиты исчерпаны"}
+        return {"error": "लिमिट खत्म हो गई"}
     if data.get("error") or data.get("status_error"):
-        return {"error": "Данные не найдены"}
+        return {"error": "डेटा नहीं मिला"}
 
     country = data.get("country", {})
     capital = data.get("capital", {})
@@ -38,7 +38,7 @@ def lookup_number(phone: str) -> dict:
     })
     other = data.get("0", {})
 
-    country_name = "Украина" if country.get("country_code3") == "UKR" else (
+    country_name = "यूक्रेन" if country.get("country_code3") == "UKR" else (
         f'{country.get("name", NOT_FOUND)}, {country.get("fullname", NOT_FOUND)}'
     )
 
@@ -61,7 +61,7 @@ def lookup_number(phone: str) -> dict:
 
     links = [
         {"name": "Instagram", "url": "https://www.instagram.com/accounts/password/reset"},
-        {"name": "WhatsApp", "url": f"https://api.whatsapp.com/send?phone={phone}&text=Привет"},
+        {"name": "WhatsApp", "url": f"https://api.whatsapp.com/send?phone={phone}&text=नमस्ते"},
         {"name": "Facebook", "url": "https://facebook.com/login/identify"},
         {"name": "LinkedIn", "url": "https://www.linkedin.com/checkpoint/rp/request-password-reset"},
         {"name": "OK.ru", "url": "https://ok.ru/dk?st.cmd=anonymRecoveryStartPhoneLink"},
@@ -83,7 +83,7 @@ def api_lookup():
     body = request.get_json(silent=True) or {}
     phone = body.get("phone", "").strip()
     if not phone:
-        return jsonify({"error": "Введите номер телефона"}), 400
+        return jsonify({"error": "फ़ोन नंबर दर्ज करें"}), 400
     return jsonify(lookup_number(phone))
 
 

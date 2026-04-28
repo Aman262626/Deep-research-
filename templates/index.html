@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="hi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mystery — Phone Lookup</title>
+  <title>Mystery — फ़ोन नंबर खोज</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -142,45 +142,45 @@
 <body>
   <div class="container">
     <h1>Mystery</h1>
-    <p class="subtitle">Phone Number Lookup Tool</p>
+    <p class="subtitle">फ़ोन नंबर से जानकारी निकालें</p>
 
     <div class="search-box">
-      <input id="phone" type="text" placeholder="+79999993993" />
-      <button id="btn" onclick="doLookup()">Поиск</button>
+      <input id="phone" type="text" placeholder="+91 9876543210" />
+      <button id="btn" onclick="doLookup()">खोजें</button>
     </div>
 
     <div id="error"></div>
-    <div id="spinner" class="spinner">Поиск данных...</div>
+    <div id="spinner" class="spinner">डेटा खोज रहे हैं...</div>
 
     <div id="result-card" class="card">
-      <h2>Результаты</h2>
+      <h2>नतीजे</h2>
       <div id="result-rows"></div>
       <p id="limit-text" class="limit-info"></p>
     </div>
 
     <div id="links-card" class="card">
-      <h2>Проверить ссылки</h2>
+      <h2>सोशल मीडिया लिंक्स</h2>
       <div id="links-grid" class="links-grid"></div>
     </div>
   </div>
 
-  <footer>Mystery Phone Lookup &copy; 2025</footer>
+  <footer>Mystery फ़ोन लुकअप &copy; 2025</footer>
 
   <script>
     const LABELS = {
-      country: "Страна",
-      city: "Город",
-      postal_code: "Почтовый индекс",
-      currency_code: "Код валюты",
-      phone_codes: "Телефонные коды",
-      auto_code: "Код региона авто",
-      operator: "Оператор",
-      location: "Местоположение",
-      geo_location: "Локация",
-      language: "Язык общения",
-      region: "Край / Округ / Область",
-      capital: "Столица",
-      lat_lon: "Широта / Долгота",
+      country: "देश",
+      city: "शहर",
+      postal_code: "पिन कोड",
+      currency_code: "मुद्रा कोड",
+      phone_codes: "फ़ोन कोड",
+      auto_code: "रीजन कोड",
+      operator: "ऑपरेटर",
+      location: "स्थान",
+      geo_location: "लोकेशन",
+      language: "भाषा",
+      region: "राज्य / क्षेत्र",
+      capital: "राजधानी",
+      lat_lon: "अक्षांश / देशांतर",
     };
 
     async function doLookup() {
@@ -221,7 +221,7 @@
           rows.innerHTML += `<div class="row"><span class="label">${label}</span><span class="value">${val}</span></div>`;
         }
         document.getElementById("limit-text").textContent =
-          "Оставшиеся лимиты: " + (json.data.limit ?? "—");
+          "बची हुई लिमिट: " + (json.data.limit ?? "—");
         resultCard.style.display = "block";
 
         // Render links
@@ -232,7 +232,7 @@
         }
         linksCard.style.display = "block";
       } catch {
-        errEl.textContent = "Ошибка сети";
+        errEl.textContent = "नेटवर्क में त्रुटि";
         errEl.style.display = "block";
       } finally {
         spinner.style.display = "none";
